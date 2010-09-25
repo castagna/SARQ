@@ -6,7 +6,7 @@ free text searches using a remote Solr server. Lucene indexes in Solr are
 additional information for accessing the RDF graph, not storage for the 
 graph itself.
 
-This is an *experimental* (and unsupported).
+This is *experimental* (and unsupported).
 
 See also:
 
