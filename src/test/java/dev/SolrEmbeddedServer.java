@@ -29,8 +29,9 @@ public class SolrEmbeddedServer {
 	private static String SOLR_HOME = ROOT + "/solr";
 	private static String JETTY_HOME = SOLR_HOME + "/jetty-6.1.25";
 	private static int JETTY_PORT = 8983;
-
-	public static void main(String[] args) throws Exception {
+	private Server server = null;
+	
+	public SolrEmbeddedServer() throws Exception {
 		System.setProperty("slave", "disabled");
 		System.setProperty("solr.solr.home", SOLR_HOME);
 		System.setProperty("java.util.logging.config.file", ROOT + "/solr/logging.properties");
@@ -39,7 +40,7 @@ public class SolrEmbeddedServer {
 		System.setProperty("STOP.PORT", "9983");
 		System.setProperty("STOP.KEY", "changeme");
 
-		Server server = new Server(JETTY_PORT);
+		server = new Server(JETTY_PORT);
         
 		WebAppContext webapp = new WebAppContext();
 		webapp.setContextPath("/solr");
@@ -54,9 +55,16 @@ public class SolrEmbeddedServer {
 		
         server.setStopAtShutdown(true);
         server.setSendServerVersion(true);
-        
 		server.start();
-		server.join();
+	}
+	
+	public Server getServer() {
+		return server;
+	}
+	
+	public static void main(String[] args) throws Exception {
+		SolrEmbeddedServer ses = new SolrEmbeddedServer();
+		ses.getServer().join();
 	}
 
 }

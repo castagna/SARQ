@@ -100,6 +100,14 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>com.hp.hpl.jena</groupId>
+      <artifactId>arq</artifactId>
+      <version>${arq.version}</version>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -121,7 +129,7 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <includes>
-            <include>org/openjena/larq/TS_LARQ.java</include>
+            <include>org/openjena/sarq/TS_SARQ.java</include>
           </includes>
         </configuration>
       </plugin>
@@ -160,7 +168,7 @@
           <windowtitle>${project.name} ${project.version}</windowtitle>
           <doctitle>${project.name} ${project.version}</doctitle>
           <!-- Exclude the implementation -->
-          <includePackageNames>org.openjena.query.larq</includePackageNames>
+          <includePackageNames>org.openjena.query.sarq</includePackageNames>
         </configuration>
       </plugin>
 

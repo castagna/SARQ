@@ -101,7 +101,7 @@ public class SARQ {
     }
 
     public static void store(SolrInputDocument doc, Node node) {
-    	doc.addField("id", node.hashCode());
+    	// doc.addField("id", node.hashCode());
 
         // Store.
         if ( node.isLiteral() ) {
