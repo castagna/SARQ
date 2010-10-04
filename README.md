@@ -36,7 +36,7 @@ Acknowledgement
         
 The design and part of the code has been taken from LARQ, see:
 
- * http://openjena.org/ARQ/lucene-arq.html
+ * [http://openjena.org/ARQ/lucene-arq.html](http://openjena.org/ARQ/lucene-arq.html)
 
 
 TODO
