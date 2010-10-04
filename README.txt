@@ -8,7 +8,25 @@ graph itself.
 
 This is *experimental* (and unsupported).
 
-See also:
+This is how you build an index from a Jena Model:
+
+    IndexBuilderModel builder = new IndexBuilderString("http://127.0.0.1:8983/solr/sarq");
+    builder.indexStatements(model.listStatements());
+    builder.commit();
+
+This is how you configure ARQ to use Solr:
+        
+    SARQ.setDefaultIndex(builder.getSolrServer());
+
+This is an example of a SPARQL query using the sarq:search property function: 
+
+  PREFIX sarq:     <http://openjena.org/SARQ/property#>
+  SELECT * WHERE {
+      ?doc ?p ?lit .
+      (?lit ?score ) sarq:search "+text" .
+  }
+        
+The design and part of the code has been taken from LARQ, see:
 
  - http://openjena.org/ARQ/lucene-arq.html
 
