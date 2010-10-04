@@ -69,7 +69,7 @@ public class TestSARQ_Script {
     
     @Before public void setUp() throws Exception {
     	server.getSolrUpdateServer().deleteByQuery("*:*");
-    	server.getSolrUpdateServer().commit(true, true);
+//    	server.getSolrUpdateServer().commit(true, true);
     }
     
     static void runTestScript(String queryFile, String dataFile, String resultsFile, IndexBuilderModel builder) {

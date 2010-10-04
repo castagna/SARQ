@@ -78,7 +78,7 @@ public class TestSARQ_Code
     
     @Before public void setUp() throws Exception {
     	server.getSolrUpdateServer().deleteByQuery("*:*");
-    	server.getSolrUpdateServer().commit(true, true);
+//    	server.getSolrUpdateServer().commit(true, true);
     }
     
     static final String datafile = "src/test/resources/SARQ/data-1.ttl" ;
