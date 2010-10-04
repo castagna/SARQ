@@ -1,4 +1,4 @@
 target
-#solr/logs/*.log
+solr/logs/*.log
 solr/sarq/data/index/*
 solr/jetty-6.1.25/work/*
