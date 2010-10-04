@@ -2,8 +2,8 @@
 <schema name="sarq-solr" version="1.2">
 
   <fields>
-    <field name="id" type="uuid" indexed="true" stored="true" default="NEW" required="false" />
-    <!-- <field name="id" type="text" indexed="true" stored="true" required="true" /> -->
+    <!-- <field name="id" type="uuid" indexed="true" stored="true" default="NEW" required="false" /> -->
+    <field name="id" type="id" indexed="true" stored="true" multiValued="false" required="true" />
     <field name="text" type="text" indexed="true" stored="true" multiValued="false" />
     <field name="lex" type="text" indexed="false" stored="true" multiValued="false" />
     <field name="lang" type="text" indexed="false" stored="true" multiValued="false" />
@@ -17,7 +17,7 @@
   <solrQueryParser defaultOperator="OR"/>
 
   <types>
-    <fieldType name="uuid" class="solr.UUIDField" indexed="true" />
+    <fieldType name="id" class="solr.LongField" indexed="true" />
     <fieldType name="text" class="solr.TextField" positionIncrementGap="100">
       <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>

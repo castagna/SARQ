@@ -44,9 +44,13 @@ public class TestSARQ_Script {
     static final String url = "http://127.0.0.1:8983/solr/sarq/";
     static final SolrServer server = new SolrServer(url);
     
-    @BeforeClass public static void startSolrServer() throws Exception {
-	    new SolrEmbeddedServer();
-		
+    @BeforeClass public static void startSolrServer() {
+    	try {
+    		new SolrEmbeddedServer();
+    	} catch (Throwable e) {
+    		e.printStackTrace();
+    	};
+
 		SolrPingResponse response = null;
 		int attempts = 0;
 		do {
@@ -54,7 +58,11 @@ public class TestSARQ_Script {
 				response = server.getSolrQueryServer().ping();
 			} catch (Throwable e) {
 				attempts++;
-				Thread.sleep(200);				
+				try {
+					Thread.sleep(200);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
 			}
 		} while ( ( ( response == null ) || ( response.getStatus() != 0 ) ) && ( attempts < 40 ) );
     }

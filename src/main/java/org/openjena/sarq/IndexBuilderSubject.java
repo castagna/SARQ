@@ -20,7 +20,6 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.query.larq.LARQ;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.sparql.ARQNotImplemented;
 
 public class IndexBuilderSubject extends IndexBuilderModel {
     Property property ;
@@ -37,7 +36,20 @@ public class IndexBuilderSubject extends IndexBuilderModel {
     
     @Override
     public void unindexStatement(Statement s) { 
-    	throw new ARQNotImplemented("unindexStatement") ; 
+        if ( ! indexThisStatement(s) )
+            return ;
+
+        try {
+            Node subject = s.getSubject().asNode() ;
+
+            if ( ! s.getObject().isLiteral() || ! LARQ.isString(s.getLiteral()) )
+                return ;
+
+            Node object  = s.getObject().asNode() ;
+            
+            builder.unindex(subject, object.getLiteralLexicalForm()) ;
+        } catch (Exception e)
+        { throw new SARQException("unindexStatement", e) ; }
     }
     
     @Override

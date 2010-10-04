@@ -19,7 +19,6 @@ package org.openjena.sarq;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Statement;
-import com.hp.hpl.jena.sparql.ARQNotImplemented;
 
 public abstract class IndexBuilderLiteral extends IndexBuilderModel {
     
@@ -33,7 +32,16 @@ public abstract class IndexBuilderLiteral extends IndexBuilderModel {
 
     @Override
     public void unindexStatement(Statement s) { 
-    	throw new ARQNotImplemented("unindexStatement") ; 
+        if ( ! indexThisStatement(s) )
+            return ;
+
+        if ( s.getObject().isLiteral() )
+        {
+            Node node = s.getObject().asNode() ;
+            if ( indexThisLiteral(s.getLiteral())) {
+            	builder.unindex(node, node.getLiteralLexicalForm()) ;
+            }
+        }
     }
     
     @Override

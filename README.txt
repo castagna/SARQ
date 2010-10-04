@@ -16,6 +16,6 @@ See also:
 TODO
 ====
 
- - Fix the failing test and add more tests.
- - Double check the id as unique key, does it make sense?
+ - Fix the failing test and add more tests. [DONE]
+ - Double check the id as unique key, does it make sense? [DONE]
  - ...

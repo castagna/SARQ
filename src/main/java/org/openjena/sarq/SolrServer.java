@@ -153,4 +153,9 @@ public class SolrServer {
 		return server;
 	}
 
+	public boolean hasMatch(String string) {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
 }

@@ -32,29 +32,55 @@ public class IndexBuilderNode extends IndexBuilderBase {
     public void index(RDFNode rdfNode, String indexStr) {
     	SolrInputDocument doc = new SolrInputDocument() ;
         SARQ.store(doc, rdfNode.asNode()) ;
-        SARQ.index(doc, indexStr) ;
+        SARQ.index(doc, rdfNode.asNode(), indexStr) ;
         getSolrServer().addDocument(doc) ;
     }
    
     public void index(RDFNode rdfNode, Reader indexStream) {
     	SolrInputDocument doc = new SolrInputDocument() ;
     	SARQ.store(doc, rdfNode.asNode()) ;
-        SARQ.index(doc, indexStream) ;
+        SARQ.index(doc, rdfNode.asNode(), indexStream) ;
         getSolrServer().addDocument(doc) ;
     }
     
     public void index(Node node, String indexStr) {
     	SolrInputDocument doc = new SolrInputDocument() ;
         SARQ.store(doc, node) ;
-        SARQ.index(doc, indexStr) ;
+        SARQ.index(doc, node, indexStr) ;
         getSolrServer().addDocument(doc) ;
     }
    
     public void index(Node node, Reader indexStream) {
     	SolrInputDocument doc = new SolrInputDocument() ;
         SARQ.store(doc, node) ;
-        SARQ.index(doc, indexStream) ;
+        SARQ.index(doc, node, indexStream) ;
         getSolrServer().addDocument(doc) ;
     }
+
+	public void unindex(RDFNode node, Reader indexStream) {
+		unindex(node.asNode(), indexStream);
+	}
+    
+	public void unindex(RDFNode node, String indexStr) {
+		unindex(node.asNode(), indexStr);
+	}
+    
+	public void unindex(Node node, Reader indexStream) {
+		try {
+			String id = SARQ.unindex(node, indexStream);
+			getSolrServer().getSolrUpdateServer().deleteById(id);			
+        } catch (Exception ex) { 
+        	throw new SARQException("unindex", ex) ; 
+        } 
+	}
+
+	public void unindex(Node node, String indexStr) {
+		try {
+			String id = SARQ.unindex(node, indexStr);
+			getSolrServer().getSolrUpdateServer().deleteById(id);
+        } catch (Exception ex) { 
+        	throw new SARQException("unindex", ex) ; 
+        } 
+	}
 
 }

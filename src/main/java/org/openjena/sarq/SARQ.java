@@ -16,7 +16,12 @@
 
 package org.openjena.sarq;
 
+import java.io.IOException;
 import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
@@ -46,9 +51,11 @@ public class SARQ {
     	PropertyFunctionRegistry.get().put(SARQPropertyFunctionLibraryURI + "search", search.class);
     }
 
+    public static final String fId                 = "id" ;
+
     // The field that is the index
     public static final String fText               = "text" ;
-    
+
     // Object literals
     public static final String fLex                 = "lex" ;
     public static final String fLang                = "lang" ;
@@ -89,21 +96,29 @@ public class SARQ {
         if ( ! indexNode.isLiteral() ) {
             throw new SARQException("Not a literal: " + indexNode) ;
         }
-        index(doc, indexNode.getLiteralLexicalForm()) ;
+        index(doc, indexNode, indexNode.getLiteralLexicalForm()) ;
     }        
      
-    public static void index(SolrInputDocument doc, String indexContent) {
+    public static void index(SolrInputDocument doc, Node node, String indexContent) {
+    	doc.addField(SARQ.fId, hash(node, indexContent));
         doc.addField(SARQ.fText, indexContent);
     }        
      
-    public static void index(SolrInputDocument doc, Reader indexContent) {
-        doc.addField(SARQ.fText, indexContent) ;
+    public static void index(SolrInputDocument doc, Node node, Reader indexContent) {
+    	String content = read(indexContent);
+    	doc.addField(SARQ.fId, hash(node, content));
+        doc.addField(SARQ.fText, content) ;
     }
 
-    public static void store(SolrInputDocument doc, Node node) {
-    	// doc.addField("id", node.hashCode());
+	public static String unindex(Node node, String indexStr) {
+		return hash(node, indexStr);
+	}
 
-        // Store.
+	public static String unindex(Node node, Reader indexContent) {
+		return hash(node, indexContent);
+	}
+    
+    public static void store(SolrInputDocument doc, Node node) {
         if ( node.isLiteral() ) {
             storeLiteral(doc, (Node_Literal)node) ;
         } else if ( node.isURI() ) {
@@ -130,7 +145,7 @@ public class SARQ {
         }
         throw new SARQException("Can't build: " + doc) ;
     }
-
+    
     public static boolean isString(Literal literal) {
         RDFDatatype dtype = literal.getDatatype() ;
         if ( dtype == null ) {
@@ -144,13 +159,14 @@ public class SARQ {
     
     private static void storeURI(SolrInputDocument doc, Node_URI node) { 
         String x = node.getURI() ;
-        doc.addField(SARQ.fText, x) ;
+        // TODO - Think about this... should "text" be multi-valued?
+        // doc.addField(SARQ.fText, x) ;
         doc.addField(SARQ.fURI, x) ;
     }
 
     private static void storeBNode(SolrInputDocument doc, Node_Blank node) { 
         String x = node.getBlankNodeLabel() ;
-        doc.addField(SARQ.fText, x) ;
+        // doc.addField(SARQ.fText, x) ;
         doc.addField(SARQ.fBNodeID, x) ;
     }
     
@@ -180,4 +196,112 @@ public class SARQ {
         return NodeFactory.createLiteralNode(lex, lang, datatype) ;
     }
 
+    private static String hash (String str) 
+    {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("MD5");
+            digest.update(str.getBytes("UTF8"));
+            byte[] hash = digest.digest();
+            BigInteger bigInt = new BigInteger(hash);
+            return bigInt.toString();
+        } catch (NoSuchAlgorithmException e) {
+        	new SARQException("hash", e);
+        } catch (UnsupportedEncodingException e) {
+        	new SARQException("hash", e);
+        }
+
+        return null;
+    }
+    
+    private static String hash (Node node, String str) 
+    {
+        String lexForm = null ; 
+        String datatypeStr = "" ;
+        String langStr = "" ;
+        
+        if ( node.isURI() ) {
+        	lexForm = node.getURI() ;
+        } else if ( node.isLiteral() ) {
+        	lexForm = node.getLiteralLexicalForm() ;
+            datatypeStr = node.getLiteralDatatypeURI() ;
+            langStr = node.getLiteralLanguage() ;
+        } else if ( node.isBlank() ) {
+        	lexForm = node.getBlankNodeLabel() ;
+        } else {
+        	throw new SARQException("Unable to hash node:"+node) ;
+        }
+
+        return hash (lexForm + "|" + langStr + "|" + datatypeStr + "|" + str);
+    }
+    
+    private static String hash (Node node, Reader reader)
+    {
+        String lexForm = null ; 
+        String datatypeStr = "" ;
+        String langStr = "" ;
+        
+        if ( node.isURI() ) {
+        	lexForm = node.getURI() ;
+        } else if ( node.isLiteral() ) {
+        	lexForm = node.getLiteralLexicalForm() ;
+            datatypeStr = node.getLiteralDatatypeURI() ;
+            langStr = node.getLiteralLanguage() ;
+        } else if ( node.isBlank() ) {
+        	lexForm = node.getBlankNodeLabel() ;
+        } else {
+        	throw new SARQException("Unable to hash node:"+node) ;
+        }
+    	
+    	StringBuffer sb = new StringBuffer();
+		try {
+	        int charsRead;
+			do {
+		    	char[] buffer = new char[1024];
+		        int offset = 0;
+		        int length = buffer.length;
+		        charsRead = 0;
+				while (offset < buffer.length) {
+					charsRead = reader.read(buffer, offset, length);
+					if (charsRead == -1)
+						break;
+					offset += charsRead;
+					length -= charsRead;
+				}
+				sb.append(buffer);
+			} while (charsRead != -1);
+			reader.reset();
+		} catch (IOException e) {
+			new SARQException("hash", e);
+		}
+		
+		return hash (lexForm + "|" + langStr + "|" + datatypeStr + "|" + sb.toString());
+    }
+    
+    private static String read(Reader reader) {
+    	StringBuffer sb = new StringBuffer();
+		try {
+	        int charsRead;
+			do {
+		    	char[] buffer = new char[1024];
+		        int offset = 0;
+		        int length = buffer.length;
+		        charsRead = 0;
+				while (offset < buffer.length) {
+					charsRead = reader.read(buffer, offset, length);
+					if (charsRead == -1)
+						break;
+					offset += charsRead;
+					length -= charsRead;
+				}
+				sb.append(buffer);
+			} while (charsRead != -1);
+			reader.reset();
+		} catch (IOException e) {
+			new SARQException("read", e);
+		}
+
+		return sb.toString();
+    }
+    
 }

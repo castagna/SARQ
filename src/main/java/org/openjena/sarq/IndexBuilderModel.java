@@ -44,11 +44,9 @@ public abstract class IndexBuilderModel extends StatementListener {
         }
     }
 
-    public void unindexStatement(Statement s) { 
-    	throw new java.lang.UnsupportedOperationException("unindexStatement") ; 
-    }
-    
     public abstract void indexStatement(Statement s) ;
+
+    public abstract void unindexStatement(Statement s) ;
 
     public void rollback() { 
     	builder.rollback() ; 
