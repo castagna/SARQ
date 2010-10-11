@@ -44,4 +44,9 @@ TODO
 
  * Fix the failing test and add more tests. [DONE]
  * Double check the id as unique key, does it make sense? [DONE]
+ * Consider using multiValue="true" when index by subject, is it possible/useful?
+ * Test with Solr, add id=x title=foo then add id=x title=bar... if title is multi value field, what happens?
+ * Add required="true" in the schema.xml where appropriate?
+ * Add custom rank field and how to combined it with existing rank?
+ * Investigate allowDups=true|false, when is it appropriate/safe to use?
  * ...
