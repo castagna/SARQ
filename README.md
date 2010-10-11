@@ -49,4 +49,5 @@ TODO
  * Add required="true" in the schema.xml where appropriate?
  * Add custom rank field and how to combined it with existing rank?
  * Investigate allowDups=true|false, when is it appropriate/safe to use?
+ * Use [EmbeddedSolrServer](http://lucene.apache.org/solr/api/org/apache/solr/client/solrj/embedded/EmbeddedSolrServer.html) for testing
  * ...
