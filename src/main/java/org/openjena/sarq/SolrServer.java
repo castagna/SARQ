@@ -42,6 +42,7 @@ public class SolrServer {
 	
 	private static CommonsHttpSolrServer queryServer = null;
 	private static StreamingUpdateSolrServer updateServer = null;
+	private org.apache.solr.client.solrj.SolrServer server = null;
 	
 	public SolrServer(String url) {
 		try {
@@ -60,13 +61,22 @@ public class SolrServer {
 		}
 	}
 	
+	public SolrServer (org.apache.solr.client.solrj.SolrServer server) {
+		this.server = server;
+	}
+	
     public Iterator<SolrDocument> search(String queryString) {
 		SolrQuery solrQuery = new SolrQuery(queryString);
 		solrQuery.setRows(Integer.MAX_VALUE);
 		solrQuery.setStart(0);
 		solrQuery.setFields("*", "score");
 		try {
-			QueryResponse response = queryServer.query(solrQuery, SolrRequest.METHOD.GET);
+			QueryResponse response = null;
+			if ( server != null ) {
+				response = server.query(solrQuery, SolrRequest.METHOD.GET);
+			} else {
+				response = queryServer.query(solrQuery, SolrRequest.METHOD.GET);				
+			}
 			return response.getResults().iterator();
 		} catch (SolrServerException e) {
 			throw new SARQException(e.getMessage(), e);
@@ -90,7 +100,11 @@ public class SolrServer {
 
     public void addDocument(SolrInputDocument doc) {
 		try {
-			updateServer.add(doc);
+			if ( server != null ) {
+				server.add(doc);
+			} else {
+				updateServer.add(doc);				
+			}
 		} catch (Exception e) {
 			throw new SARQException(e.getMessage(), e);
 		}
@@ -154,8 +168,43 @@ public class SolrServer {
 	}
 
 	public boolean hasMatch(String string) {
-		// TODO Auto-generated method stub
-		return false;
+		return search(string).hasNext();
+	}
+
+	public void rollback() {
+		try {
+			if ( server != null ) {
+				server.rollback();
+			} else {
+				updateServer.rollback();				
+			}
+        } catch (Exception ex) { 
+        	throw new SARQException("rollback", ex) ; 
+        }
+	}
+
+	public void commit() {
+		try {
+			if ( server != null ) {
+				server.commit();
+			} else {
+				updateServer.commit();				
+			}
+        } catch (Exception ex) { 
+        	throw new SARQException("commit", ex) ; 
+        }
+	}
+
+	public void optimize() {
+		try {
+			if ( server != null ) {
+				server.optimize();
+			} else {
+				updateServer.optimize();				
+			}
+        } catch (Exception ex) { 
+        	throw new SARQException("optimize", ex) ; 
+        }
 	}
 
 }

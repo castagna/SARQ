@@ -24,6 +24,16 @@ import com.hp.hpl.jena.rdf.model.Statement;
 public class IndexBuilderSubject extends IndexBuilderModel {
     Property property ;
     
+    public IndexBuilderSubject(org.apache.solr.client.solrj.SolrServer server) { 
+    	super(server) ; 
+    }
+
+    public IndexBuilderSubject(Property p, org.apache.solr.client.solrj.SolrServer server)
+    {
+        this(server) ;
+        property = p ;
+    }
+    
     public IndexBuilderSubject(String url) { 
     	super(url) ; 
     }
@@ -33,6 +43,7 @@ public class IndexBuilderSubject extends IndexBuilderModel {
         this(url) ;
         property = p ;
     }
+    
     
     @Override
     public void unindexStatement(Statement s) { 

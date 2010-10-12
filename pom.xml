@@ -44,6 +44,13 @@
       <groupId>com.hp.hpl.jena</groupId>
       <artifactId>arq</artifactId>
       <version>${arq.version}</version>
+      <exclusions>
+        <!--  Solr has a more up-to-date version -->
+        <exclusion>
+          <groupId>org.apache.lucene</groupId>
+          <artifactId>lucene-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -106,6 +113,13 @@
       <version>${arq.version}</version>
       <type>test-jar</type>
       <scope>test</scope>
+      <exclusions>
+        <!--  Solr has a more up-to-date version -->
+        <exclusion>
+          <groupId>org.apache.lucene</groupId>
+          <artifactId>lucene-core</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
   </dependencies>

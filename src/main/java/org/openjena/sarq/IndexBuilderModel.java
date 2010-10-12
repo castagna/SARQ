@@ -28,6 +28,10 @@ public abstract class IndexBuilderModel extends StatementListener {
     	builder = new IndexBuilderNode(url) ; 
     }
 
+    public IndexBuilderModel(org.apache.solr.client.solrj.SolrServer server) { 
+    	builder = new IndexBuilderNode(server) ; 
+    }
+
     @Override
     public void addedStatement(Statement s) { 
     	indexStatement(s) ; 

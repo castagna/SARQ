@@ -25,6 +25,10 @@ import com.hp.hpl.jena.rdf.model.RDFNode;
 
 public class IndexBuilderNode extends IndexBuilderBase {
 
+	public IndexBuilderNode(org.apache.solr.client.solrj.SolrServer server) {
+		super(server);
+	}
+	
 	public IndexBuilderNode(String url) { 
     	super(url) ; 
     }

@@ -21,7 +21,11 @@ import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.rdf.model.Statement;
 
 public abstract class IndexBuilderLiteral extends IndexBuilderModel {
-    
+
+    public IndexBuilderLiteral(org.apache.solr.client.solrj.SolrServer server) { 
+    	super(server) ; 
+    }
+	
     public IndexBuilderLiteral(String url) { 
     	super(url) ; 
     }

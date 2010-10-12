@@ -23,8 +23,17 @@ import com.hp.hpl.jena.rdf.model.Statement;
 public class IndexBuilderString extends IndexBuilderLiteral {
     private Property property = null ;
 
+    public IndexBuilderString(org.apache.solr.client.solrj.SolrServer server) { 
+    	super(server) ; 
+    }
+    
     public IndexBuilderString(String url) { 
     	super(url) ; 
+    }
+
+    public IndexBuilderString(Property property, org.apache.solr.client.solrj.SolrServer server) { 
+    	super(server) ; 
+    	setProperty(property) ; 
     }
 
     public IndexBuilderString(Property property, String url) { 

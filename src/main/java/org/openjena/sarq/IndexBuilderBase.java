@@ -20,35 +20,27 @@ public class IndexBuilderBase implements IndexBuilder {
 
 	private SolrServer index = null;
 
+	public IndexBuilderBase(org.apache.solr.client.solrj.SolrServer server) {
+		index = new SolrServer(server);
+	}
+	
     public IndexBuilderBase(String url) {
    		index = new SolrServer(url);
     }
 
     @Override
     public void rollback() { 
-        try {
-            index.getSolrUpdateServer().rollback();
-        } catch (Exception ex) { 
-        	throw new SARQException("commit", ex) ; 
-        }
+        index.rollback();
     }
 
     @Override
     public void commit() { 
-        try {
-            index.getSolrUpdateServer().commit();
-        } catch (Exception ex) { 
-        	throw new SARQException("commit", ex) ; 
-        }
+        index.commit();
     }
 
     @Override 
     public void optimize() { 
-        try {
-            index.getSolrUpdateServer().optimize();
-        } catch (Exception ex) { 
-        	throw new SARQException("optimize", ex) ; 
-        }
+    	index.optimize();
     }
     
     public SolrServer getSolrServer() {
