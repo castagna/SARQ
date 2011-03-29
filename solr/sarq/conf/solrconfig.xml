@@ -18,7 +18,7 @@
     <useCompoundFile>false</useCompoundFile>
     <ramBufferSizeMB>32</ramBufferSizeMB>
     <mergeFactor>10</mergeFactor>
-    <unlockOnStartup>false</unlockOnStartup>
+    <unlockOnStartup>true</unlockOnStartup>
     <reopenReaders>true</reopenReaders>
     <deletionPolicy class="solr.SolrDeletionPolicy">
       <str name="maxCommitsToKeep">1</str>
@@ -62,14 +62,6 @@
      <lst name="defaults">
        <str name="echoParams">explicit</str>
      </lst>
-  </requestHandler>
-
-  <requestHandler name="/replication" class="solr.ReplicationHandler" >
-    <lst name="master">
-      <str name="replicateAfter">commit</str>
-      <str name="replicateAfter">startup</str>
-      <str name="confFiles">solrconfig.xml,schema.xml,stopwords.txt,protwords.txt,synonyms.txt,mapping-ISOLatin1Accent.txt</str>
-    </lst>
   </requestHandler>
 
   <requestHandler name="/update" class="solr.XmlUpdateRequestHandler" />

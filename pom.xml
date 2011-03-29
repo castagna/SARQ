@@ -4,7 +4,7 @@
 
   <groupId>org.openjena</groupId>
   <artifactId>sarq</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>SARQ</name>
@@ -30,10 +30,9 @@
   </scm>
 
   <properties>
-    <arq.version>2.8.5</arq.version>
-    <tdb.version>0.8.7</tdb.version>
-    <solr.version>1.4.0</solr.version>
-    <jetty.version>6.1.25</jetty.version>
+    <arq.version>2.8.7</arq.version>
+    <tdb.version>0.8.9</tdb.version>
+    <solr.version>1.4.1</solr.version>
     <jdk.version>1.6</jdk.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
@@ -74,24 +73,9 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.1</version>
+      <version>4.8.2</version>
       <scope>test</scope>
     </dependency>
-
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jetty</artifactId>
-      <version>${jetty.version}</version>
-      <scope>test</scope>
-    </dependency>
-    
-    <dependency>
-      <groupId>org.mortbay.jetty</groupId>
-      <artifactId>jsp-2.1-jetty</artifactId>
-      <version>${jetty.version}</version>
-      <scope>test</scope>
-    </dependency>
-    
 
     <dependency>
       <groupId>org.apache.solr</groupId>
@@ -99,6 +83,13 @@
       <version>${solr.version}</version>
       <scope>test</scope>
     </dependency>
+    
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>test</scope>
+    </dependency>    
 
     <dependency>
       <groupId>com.hp.hpl.jena</groupId>
@@ -234,7 +225,7 @@
     <developer>
       <id>pc</id>
       <name>Paolo Castagna</name>
-      <organization>Talis</organization>
+      <organization>Talis Systems Ltd.</organization>
       <organizationUrl>http://www.talis.com/</organizationUrl>
       <roles>
         <role>developer</role>

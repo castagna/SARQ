@@ -22,8 +22,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses( {
     TestSARQ_Code.class,
-    TestSARQ_Script.class,
-    TestSARQ_Script2.class
+    TestSARQ_Script.class
 } )
 
 public class TS_SARQ {}

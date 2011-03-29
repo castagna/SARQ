@@ -18,7 +18,8 @@ package org.openjena.sarq;
 
 import static org.junit.Assert.assertTrue;
 
-import org.apache.solr.client.solrj.response.SolrPingResponse;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.core.CoreContainer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -36,40 +37,22 @@ import com.hp.hpl.jena.sparql.resultset.ResultSetRewindable;
 import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.DC;
 
-import dev.SolrEmbeddedServer;
-
 public class TestSARQ_Script {
 
     static final String root = "src/test/resources/SARQ/" ;
-    static final String url = "http://127.0.0.1:8983/solr/sarq/";
-    static final SolrServer server = new SolrServer(url);
     
-    @BeforeClass public static void startSolrServer() {
-    	try {
-    		new SolrEmbeddedServer();
-    	} catch (Throwable e) {
-    		e.printStackTrace();
-    	};
-
-		SolrPingResponse response = null;
-		int attempts = 0;
-		do {
-			try {
-				response = server.getSolrQueryServer().ping();
-			} catch (Throwable e) {
-				attempts++;
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-			}
-		} while ( ( ( response == null ) || ( response.getStatus() != 0 ) ) && ( attempts < 40 ) );
+    static EmbeddedSolrServer server = null;
+    
+    @BeforeClass public static void startSolrServer() throws Exception {
+        System.setProperty("solr.solr.home", "solr/sarq");
+        CoreContainer.Initializer initializer = new CoreContainer.Initializer();
+        CoreContainer coreContainer = initializer.initialize();
+        server = new EmbeddedSolrServer(coreContainer, "");
     }
     
     @Before public void setUp() throws Exception {
-    	server.getSolrUpdateServer().deleteByQuery("*:*");
-//    	server.getSolrUpdateServer().commit(true, true);
+        server.deleteByQuery("*:*");
+        server.commit(true, true);
     }
     
     static void runTestScript(String queryFile, String dataFile, String resultsFile, IndexBuilderModel builder) {
@@ -103,31 +86,31 @@ public class TestSARQ_Script {
     }
     
     @Test public void test_larq_1() { 
-    	runTestScript("larq-q-1.rq", "data-1.ttl", "results-1.srj", new IndexBuilderString(url)) ; 
+    	runTestScript("larq-q-1.rq", "data-1.ttl", "results-1.srj", new IndexBuilderString(server)) ; 
     }
 
     @Test public void test_larq_2() { 
-    	runTestScript("larq-q-2.rq", "data-1.ttl", "results-2.srj", new IndexBuilderString(DC.title, url)) ; 
+    	runTestScript("larq-q-2.rq", "data-1.ttl", "results-2.srj", new IndexBuilderString(DC.title, server)) ; 
     }
 
     @Test public void test_larq_3() { 
-    	runTestScript("larq-q-3.rq", "data-1.ttl", "results-3.srj", new IndexBuilderSubject(DC.title, url)) ; 
+    	runTestScript("larq-q-3.rq", "data-1.ttl", "results-3.srj", new IndexBuilderSubject(DC.title, server)) ; 
     }
     
     @Test public void test_larq_4() { 
-    	runTestScript("larq-q-4.rq", "data-1.ttl", "results-4.srj", new IndexBuilderString(url)) ; 
+    	runTestScript("larq-q-4.rq", "data-1.ttl", "results-4.srj", new IndexBuilderString(server)) ; 
     }
     
     @Test public void test_larq_5() { 
-    	runTestScript("larq-q-5.rq", "data-1.ttl", "results-5.srj", new IndexBuilderString(url)) ; 
+    	runTestScript("larq-q-5.rq", "data-1.ttl", "results-5.srj", new IndexBuilderString(server)) ; 
     }
 
     @Test public void test_larq_6() { 
-    	runTestScript("larq-q-6.rq", "data-1.ttl", "results-6.srj", new IndexBuilderString(url)) ; 
+    	runTestScript("larq-q-6.rq", "data-1.ttl", "results-6.srj", new IndexBuilderString(server)) ; 
    	}
 
     @Test public void test_larq_7() { 
-    	runTestScript("larq-q-7.rq", "data-1.ttl", "results-7.srj", new IndexBuilderString(url)) ; 
+    	runTestScript("larq-q-7.rq", "data-1.ttl", "results-7.srj", new IndexBuilderString(server)) ; 
     }
 
 }

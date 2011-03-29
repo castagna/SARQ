@@ -22,10 +22,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
 
-import org.apache.solr.client.solrj.response.SolrPingResponse;
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.common.SolrDocument;
+import org.apache.solr.core.CoreContainer;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,47 +49,28 @@ import com.hp.hpl.jena.util.FileManager;
 import com.hp.hpl.jena.vocabulary.DC;
 import com.hp.hpl.jena.vocabulary.RDFS;
 
-import dev.SolrEmbeddedServer;
-
 public class TestSARQ_Code 
 {
 
-    static final String url = "http://127.0.0.1:8983/solr/sarq/";
-    static final SolrServer server = new SolrServer(url);
+    static EmbeddedSolrServer server = null;
 	
-    @BeforeClass public static void startSolrServer() {
-    	try {
-    		new SolrEmbeddedServer();
-    	} catch (Throwable e) {
-    		e.printStackTrace();
-    	};
-
-		SolrPingResponse response = null;
-		int attempts = 0;
-		do {
-			try {
-				response = server.getSolrQueryServer().ping();
-			} catch (Throwable e) {
-				attempts++;
-				try {
-					Thread.sleep(200);
-				} catch (InterruptedException e1) {
-					e1.printStackTrace();
-				}
-			}
-		} while ( ( ( response == null ) || ( response.getStatus() != 0 ) ) && ( attempts < 40 ) );
+    @BeforeClass public static void startSolrServer() throws Exception {
+        System.setProperty("solr.solr.home", "solr/sarq");
+        CoreContainer.Initializer initializer = new CoreContainer.Initializer();
+        CoreContainer coreContainer = initializer.initialize();
+        server = new EmbeddedSolrServer(coreContainer, "");
     }
     
     @Before public void setUp() throws Exception {
-    	server.getSolrUpdateServer().deleteByQuery("*:*");
-//    	server.getSolrUpdateServer().commit(true, true);
+        server.deleteByQuery("*:*");
+        server.commit(true, true);
     }
     
     static final String datafile = "src/test/resources/SARQ/data-1.ttl" ;
     
     public void test_ext_1()
     {
-        IndexBuilderNode b = new IndexBuilderNode(url) ;
+        IndexBuilderNode b = new IndexBuilderNode(server) ;
         Model model = ModelFactory.createDefaultModel() ;
         Resource r = model.createResource("http://example/r") ;
         b.index(r, "foo") ;
@@ -101,7 +86,7 @@ public class TestSARQ_Code
     
     @Test public void test_ext_2()
     {
-        IndexBuilderNode b = new IndexBuilderNode(url) ;
+        IndexBuilderNode b = new IndexBuilderNode(server) ;
         Model model = ModelFactory.createDefaultModel() ;
         Literal lit = model.createLiteral("example") ;
         b.index(lit, "foo") ;
@@ -117,7 +102,7 @@ public class TestSARQ_Code
 
     @Test public void test_ext_3()
     {
-        IndexBuilderNode b = new IndexBuilderNode(url) ;
+        IndexBuilderNode b = new IndexBuilderNode(server) ;
         Model model = ModelFactory.createDefaultModel() ;
         Resource bnode = model.createResource() ;
         b.index(bnode, "foo") ;
@@ -134,7 +119,7 @@ public class TestSARQ_Code
 
     @Test public void test_ext_4()
     {
-        IndexBuilderNode b = new IndexBuilderNode(url) ;
+        IndexBuilderNode b = new IndexBuilderNode(server) ;
         Model model = ModelFactory.createDefaultModel() ;
         Resource r = model.createResource("http://example/r") ;
         b.index(r, "foo") ;
@@ -147,7 +132,7 @@ public class TestSARQ_Code
     
     @Test public void test_ext_5()
     {
-        IndexBuilderNode b = new IndexBuilderNode(url) ;
+        IndexBuilderNode b = new IndexBuilderNode(server) ;
         Resource r = ResourceFactory.createResource("http://example/r") ;
         StringReader sr = new StringReader("foo") ;
         b.index(r, sr) ;
@@ -164,7 +149,7 @@ public class TestSARQ_Code
     // Test what happens when the index is updated after a reader index (LARQIndex) is created
     @Test public void test_ext_6()
     {
-        IndexBuilderNode b = new IndexBuilderNode(url) ;
+        IndexBuilderNode b = new IndexBuilderNode(server) ;
         Model model = ModelFactory.createDefaultModel() ;
         Resource r1 = model.createResource("http://example/r1") ;
         Resource r2 = model.createResource("http://example/r2") ;
@@ -180,7 +165,7 @@ public class TestSARQ_Code
         assertEquals(0, TestSARQUtils.count(nIter)) ;
         
         // Add r2.
-        b = new IndexBuilderNode(url) ;
+        b = new IndexBuilderNode(server) ;
         b.index(r2, new StringReader("R2")) ;
         b.commit() ;
 
@@ -197,7 +182,7 @@ public class TestSARQ_Code
     @Test public void test_index_literal_1()
     { 
         Model model = ModelFactory.createDefaultModel() ;
-        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(url)) ; 
+        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(server)) ; 
         Iterator<SolrDocument> nIter = index.search("+document") ;
         // Search both DC title and RDFS label
         assertEquals(3,TestSARQUtils.count(nIter)) ;
@@ -206,7 +191,7 @@ public class TestSARQ_Code
     @Test public void test_index_literal_2()
     { 
         Model model = ModelFactory.createDefaultModel() ;
-        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(DC.title, url)) ; 
+        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(DC.title, server)) ; 
         Iterator<SolrDocument> nIter = index.search("+document") ;
         // Search just DC title
         assertEquals(2,TestSARQUtils.count(nIter)) ;
@@ -215,7 +200,7 @@ public class TestSARQ_Code
     @Test public void test_index_literal_3()
     { 
         Model model = ModelFactory.createDefaultModel() ;
-        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(url)) ; 
+        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(server)) ; 
         Iterator<SolrDocument> nIter = index.search("+document") ;
         // Search both DC title and RDFS label
         for ( ; nIter.hasNext(); )
@@ -232,7 +217,7 @@ public class TestSARQ_Code
     @Test public void test_index_literal_4()
     { 
         Model model = ModelFactory.createDefaultModel() ;
-        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(DC.title, url)) ; 
+        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(DC.title, server)) ; 
         Iterator<SolrDocument> nIter = index.search("+document") ;
         // Search both DC title and RDFS label
         for ( ; nIter.hasNext(); )
@@ -248,7 +233,7 @@ public class TestSARQ_Code
     @Test public void test_index_subject_1()
     { 
         Model model = ModelFactory.createDefaultModel() ;
-        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderSubject(url)) ; 
+        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderSubject(server)) ; 
         Iterator<SolrDocument> nIter = index.search("+document") ;
         // Search both DC title and RDFS label
         assertEquals(3,TestSARQUtils.count(nIter)) ;
@@ -257,7 +242,7 @@ public class TestSARQ_Code
     @Test public void test_index_subject_2()
     { 
         Model model = ModelFactory.createDefaultModel() ;
-        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderSubject(DC.title, url)) ; 
+        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderSubject(DC.title, server)) ; 
         Iterator<SolrDocument> nIter = index.search("+document") ;
         // Search both DC title and RDFS label
         assertEquals(2,TestSARQUtils.count(nIter)) ;
@@ -266,7 +251,7 @@ public class TestSARQ_Code
     @Test public void test_index_subject_3()
     { 
         Model model = ModelFactory.createDefaultModel() ;
-        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderSubject(url)) ; 
+        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderSubject(server)) ; 
         Iterator<SolrDocument> nIter = index.search("+document") ;
         // Search both DC title and RDFS label
         for ( ; nIter.hasNext(); )
@@ -283,7 +268,7 @@ public class TestSARQ_Code
     @Test public void test_index_subject_4()
     { 
         Model model = ModelFactory.createDefaultModel() ;
-        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderSubject(DC.title, url)) ; 
+        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderSubject(DC.title, server)) ; 
         Iterator<SolrDocument> nIter = index.search("+document") ;
         for ( ; nIter.hasNext(); )
         {
@@ -297,32 +282,32 @@ public class TestSARQ_Code
     // Negative searches
     @Test public void test_negative_1()
     {
-    	SolrServer index = TestSARQUtils.createIndex(datafile, new IndexBuilderString(url)) ;
+    	SolrServer index = TestSARQUtils.createIndex(datafile, new IndexBuilderString(server)) ;
         assertFalse(index.hasMatch("+iceberg")) ;
     }
 
     @Test public void test_negative_2()
     {
-    	SolrServer index = TestSARQUtils.createIndex(datafile, new IndexBuilderString(DC.title, url)) ;
+    	SolrServer index = TestSARQUtils.createIndex(datafile, new IndexBuilderString(DC.title, server)) ;
         assertFalse(index.hasMatch("+iceberg")) ;
     }
 
     @Test public void test_negative_3()
     {
-    	SolrServer index = TestSARQUtils.createIndex(datafile, new IndexBuilderSubject(url)) ;
+    	SolrServer index = TestSARQUtils.createIndex(datafile, new IndexBuilderSubject(server)) ;
         assertFalse(index.hasMatch("+iceberg")) ;
     }
     
     @Test public void test_negative_4()
     {
-    	SolrServer index = TestSARQUtils.createIndex(datafile, new IndexBuilderSubject(DC.title, url)) ;
+    	SolrServer index = TestSARQUtils.createIndex(datafile, new IndexBuilderSubject(DC.title, server)) ;
         assertFalse(index.hasMatch("+iceberg")) ;
     }
     
     @Test public void test_search_index_registration_1()
     {
         Model model = ModelFactory.createDefaultModel() ;
-        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(url)) ;
+        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(server)) ;
         assertFalse(ARQ.getContext().isDefined(SARQ.indexKey)) ;
         try {
             SARQ.setDefaultIndex(index) ;
@@ -339,7 +324,7 @@ public class TestSARQ_Code
     @Test public void test_search_index_registration_2()
     {
         Model model = ModelFactory.createDefaultModel() ;
-        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(url)) ;
+        SolrServer index = TestSARQUtils.createIndex(model, datafile, new IndexBuilderString(server)) ;
         
         assertFalse(ARQ.getContext().isDefined(SARQ.indexKey)) ;
         QueryExecution qExec = TestSARQUtils.query(model, "{ ?lit sarq:search '+document' }") ;
@@ -361,7 +346,7 @@ public class TestSARQ_Code
     
     @Test public void test_remove_1() 
     {
-        IndexBuilderNode b = new IndexBuilderNode(url) ;
+        IndexBuilderNode b = new IndexBuilderNode(server) ;
         Resource r = ResourceFactory.createResource("http://example/r") ;
         b.index(r, "foo") ;
         b.unindex(r, "foo");
@@ -373,7 +358,7 @@ public class TestSARQ_Code
     
     @Test public void test_remove_2() throws Exception 
     {
-        IndexBuilderString b = new IndexBuilderString(url);
+        IndexBuilderString b = new IndexBuilderString(server);
     	Model model = ModelFactory.createDefaultModel();
         model.register(b) ;
         FileManager.get().readModel(model, datafile) ;
@@ -386,7 +371,7 @@ public class TestSARQ_Code
 
     @Test public void test_remove_3() throws IOException 
     {
-        IndexBuilderNode b = new IndexBuilderNode(url) ;
+        IndexBuilderNode b = new IndexBuilderNode(server) ;
         Resource r = ResourceFactory.createResource("http://example/r") ;
         StringReader sr = new StringReader("foo") ;
         b.index(r, sr) ;
@@ -400,7 +385,7 @@ public class TestSARQ_Code
 
     @Test public void test_duplicates_1() 
     {
-        IndexBuilderNode b = new IndexBuilderNode(url) ;
+        IndexBuilderNode b = new IndexBuilderNode(server) ;
         Resource r = ResourceFactory.createResource("http://example/r") ;
         b.index(r, "foo") ;
         b.index(r, "foo") ;
@@ -413,7 +398,7 @@ public class TestSARQ_Code
     
     @Test public void test_duplicates_2() throws Exception 
     {
-        IndexBuilderString b = new IndexBuilderString(url);
+        IndexBuilderString b = new IndexBuilderString(server);
     	Model model = ModelFactory.createDefaultModel();
         model.register(b) ;
         model.add(model.createResource("http://example/r"), RDFS.label, "foo");
@@ -427,7 +412,7 @@ public class TestSARQ_Code
 
     @Test public void test_duplicates_3() 
     {
-        IndexBuilderNode b = new IndexBuilderNode(url) ;
+        IndexBuilderNode b = new IndexBuilderNode(server) ;
         Resource r1 = ResourceFactory.createResource() ;
         Resource r2 = ResourceFactory.createResource() ;
         b.index(r1, "foo") ;
@@ -447,7 +432,7 @@ public class TestSARQ_Code
     
     @Test public void test_duplicates_4() throws Exception 
     {
-        IndexBuilderString b = new IndexBuilderString(url);
+        IndexBuilderString b = new IndexBuilderString(server);
     	Model model = ModelFactory.createDefaultModel();
         model.register(b) ;
         model.add(model.createResource(), RDFS.label, "foo");
@@ -461,7 +446,7 @@ public class TestSARQ_Code
     
     @Test public void test_duplicates_5() throws Exception 
     {
-        IndexBuilderNode b = new IndexBuilderNode(url);
+        IndexBuilderNode b = new IndexBuilderNode(server);
         
         Resource blank = ResourceFactory.createResource() ;
         b.index(blank, "foo");

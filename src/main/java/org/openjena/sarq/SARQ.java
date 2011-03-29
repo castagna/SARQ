@@ -204,7 +204,7 @@ public class SARQ {
             digest.update(str.getBytes("UTF8"));
             byte[] hash = digest.digest();
             BigInteger bigInt = new BigInteger(hash);
-            return bigInt.toString();
+            return Long.toString(bigInt.longValue());
         } catch (NoSuchAlgorithmException e) {
         	new SARQException("hash", e);
         } catch (UnsupportedEncodingException e) {

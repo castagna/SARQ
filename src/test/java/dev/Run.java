@@ -18,6 +18,8 @@ package dev;
 
 import java.io.File;
 
+import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
+import org.apache.solr.core.CoreContainer;
 import org.openjena.sarq.IndexBuilderModel;
 import org.openjena.sarq.IndexBuilderString;
 import org.openjena.sarq.SARQ;
@@ -43,8 +45,13 @@ public class Run {
 	public static File PATH_SOLR_INDEX = new File ("target/data/solr");
 	public static String TDB_ASSEMBLER_FILENAME = "src/test/resources/tdb.ttl";
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		PATH_SOLR_INDEX.mkdirs();
+		
+        System.setProperty("solr.solr.home", "solr/sarq");
+        CoreContainer.Initializer initializer = new CoreContainer.Initializer();
+        CoreContainer coreContainer = initializer.initialize();
+        EmbeddedSolrServer server = new EmbeddedSolrServer(coreContainer, "");
 		
 		// Load data into TDB
 		Dataset dataset = TDBFactory.assembleDataset(TDB_ASSEMBLER_FILENAME);
@@ -57,7 +64,8 @@ public class Run {
 		
 		
 		// Build Solr index
-        IndexBuilderModel builder = new IndexBuilderString("http://127.0.0.1:8983/solr/sarq");
+		IndexBuilderModel builder = new IndexBuilderString(server);
+		// IndexBuilderModel builder = new IndexBuilderString("http://127.0.0.1:8983/solr/sarq");
         // IndexBuilderModel builder = new IndexBuilderSubject("http://127.0.0.1:8983/solr");
         
         builder.indexStatements(model.listStatements());
@@ -83,7 +91,9 @@ public class Run {
         ResultSet res = qe.execSelect();
         ResultSetFormatter.out(res);
         qe.close();	
-	
+        
+        server = null;
+        System.exit(0);
 	}
 
 }

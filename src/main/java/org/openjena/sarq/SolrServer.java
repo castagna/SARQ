@@ -110,12 +110,20 @@ public class SolrServer {
 		}
 	}
     
-    public CommonsHttpSolrServer getSolrQueryServer() {
-    	return queryServer;
+    public org.apache.solr.client.solrj.SolrServer getSolrQueryServer() {
+        if ( server != null ) {
+            return server;
+        } else {
+            return queryServer;            
+        }
     }
     
-    public StreamingUpdateSolrServer getSolrUpdateServer() {
-    	return updateServer;
+    public org.apache.solr.client.solrj.SolrServer getSolrUpdateServer() {
+        if ( server != null ) {
+            return server;            
+        } else {
+            return updateServer;            
+        }
     }
     
 	private CommonsHttpSolrServer buildSolrQueryServer (String url, boolean binary) throws MalformedURLException {
